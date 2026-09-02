@@ -122,15 +122,25 @@ export default function CatalogoCursos({ cursos, profesores, asignaciones, ilust
               <span className="sr-only">Ver programa de {curso.titulo}</span>
             </Link>
 
-            <div className="mb-5 h-40 overflow-hidden rounded-3xl bg-gradient-to-br from-petro-50 to-petro-100 p-2">
+            <div className="relative mb-5 h-40 overflow-hidden rounded-3xl bg-gradient-to-br from-petro-50 to-petro-100">
               {curso.portada_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={curso.portada_url}
-                  alt={`Portada del curso ${curso.titulo}`}
-                  loading="lazy"
-                  className="h-full w-full object-contain"
-                />
+                <>
+                  {/* Fondo desenfocado: rellena la tarjeta con el mismo color sin recortar la foto real */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={curso.portada_url}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-xl"
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={curso.portada_url}
+                    alt={`Portada del curso ${curso.titulo}`}
+                    loading="lazy"
+                    className="relative h-full w-full object-contain transition duration-500 group-hover:scale-105"
+                  />
+                </>
               ) : (
                 <div className="grid h-full place-items-center">
                   <svg viewBox="0 0 64 64" className="h-16 w-16 text-petro-500" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden="true">

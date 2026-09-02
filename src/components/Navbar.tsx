@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Logo from './Logo';
+import BotonSalir from './BotonSalir';
 import type { SesionUsuario } from '@/lib/types';
 
 const ENLACES: readonly { href: string; texto: string }[] = [
@@ -49,6 +50,7 @@ export default function Navbar({ sesion }: { sesion: SesionUsuario | null }) {
                   Mi panel
                 </Link>
               )}
+              <BotonSalir className="text-sm font-semibold text-slate-600 transition hover:text-night disabled:opacity-60" />
             </>
           ) : (
             <>
@@ -90,10 +92,22 @@ export default function Navbar({ sesion }: { sesion: SesionUsuario | null }) {
               </a>
             </li>
           ))}
-          <li className="flex gap-3 pt-2">
-            <Link href="/login" className="cta-suave flex-1">Iniciar sesion</Link>
-            <Link href="/register" className="cta flex-1">Registrarse</Link>
-          </li>
+          {sesion ? (
+            <li className="flex flex-col gap-2 pt-2">
+              <span className="px-4 text-sm font-semibold text-slate-500">Hola, {sesion.nombre.split(' ')[0]}</span>
+              <div className="flex gap-3">
+                {sesion.rol !== 'alumno' && (
+                  <Link href={panel} onClick={() => setAbierto(false)} className="cta flex-1">Mi panel</Link>
+                )}
+                <BotonSalir className="cta-suave flex-1" />
+              </div>
+            </li>
+          ) : (
+            <li className="flex gap-3 pt-2">
+              <Link href="/login" className="cta-suave flex-1">Iniciar sesion</Link>
+              <Link href="/register" className="cta flex-1">Registrarse</Link>
+            </li>
+          )}
         </motion.ul>
       )}
     </motion.header>

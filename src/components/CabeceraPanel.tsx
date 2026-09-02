@@ -1,18 +1,8 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
 import Logo from './Logo';
+import BotonSalir from './BotonSalir';
 import type { SesionUsuario } from '@/lib/types';
 
 export default function CabeceraPanel({ sesion, titulo }: { sesion: SesionUsuario; titulo: string }) {
-  const router = useRouter();
-
-  async function salir(): Promise<void> {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/');
-    router.refresh();
-  }
-
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] bg-white px-6 py-5 shadow-card">
       <div className="flex items-center gap-6">
@@ -24,9 +14,7 @@ export default function CabeceraPanel({ sesion, titulo }: { sesion: SesionUsuari
           </p>
         </div>
       </div>
-      <button type="button" onClick={() => void salir()} className="cta-suave">
-        Cerrar sesion
-      </button>
+      <BotonSalir />
     </header>
   );
 }

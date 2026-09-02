@@ -5,6 +5,7 @@ import Logo from '@/components/Logo';
 import Aparecer from '@/components/Aparecer';
 import VisorItem from '@/components/VisorItem';
 import ExamenModulo from '@/components/ExamenModulo';
+import BotonSalir from '@/components/BotonSalir';
 import { listarCursosPublicos, listarItems, listarModulos, listarPreguntasPublicas, listarTemas } from '@/lib/data';
 import { getSesion } from '@/lib/session';
 import type { Item, Modulo, PreguntaPublica, Tema } from '@/lib/types';
@@ -34,9 +35,12 @@ export default async function PaginaCurso({ params }: { params: { slug: string }
       <div className="mx-auto w-full max-w-[1200px] bg-white">
         <header className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-12">
           <Logo />
-          <Link href="/#cursos" className="text-sm font-semibold text-slate-500 transition hover:text-night">
-            Todos los cursos
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/#cursos" className="text-sm font-semibold text-slate-500 transition hover:text-night">
+              Todos los cursos
+            </Link>
+            {sesion && <BotonSalir className="cta-suave" />}
+          </div>
         </header>
 
         <main className="bg-white px-6 py-12 sm:px-12">
