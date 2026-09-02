@@ -1,0 +1,89 @@
+{
+  "preguntas": [
+    {
+      "enunciado": "Cual es la funcion principal del lodo de perforacion?",
+      "opciones": [
+        "Enfriar y lubricar la barrena, y transportar el recorte a superficie",
+        "Generar energia electrica para el taladro",
+        "Servir de combustible al motor de la planta",
+        "Pintar la tuberia de revestimiento"
+      ],
+      "correcta": "a",
+      "orden": 1
+    },
+    {
+      "enunciado": "Que es la roca madre en un sistema petrolero?",
+      "opciones": [
+        "La formacion donde se genera el hidrocarburo por maduracion de la materia organica",
+        "La roca por la que migra el petroleo",
+        "La roca que sella el yacimiento",
+        "La roca porosa donde se acumula el crudo"
+      ],
+      "correcta": "a",
+      "orden": 2
+    },
+    {
+      "enunciado": "El sello (roca sello) de una trampa petrolera se caracteriza por ser:",
+      "opciones": ["Muy permeable", "Impermeable", "Radiactivo", "Magnetico"],
+      "correcta": "b",
+      "orden": 3
+    },
+    {
+      "enunciado": "Que registro se usa habitualmente para estimar la litologia y el contenido de arcilla?",
+      "opciones": ["Caliper", "Gamma Ray", "Registro de temperatura", "Registro de presion"],
+      "correcta": "b",
+      "orden": 4
+    },
+    {
+      "enunciado": "La porosidad de una roca reservorio representa:",
+      "opciones": [
+        "La fraccion de volumen de poros respecto al volumen total de la roca",
+        "La capacidad de la roca para transmitir fluidos",
+        "La densidad de la matriz mineral",
+        "La resistencia mecanica de la roca"
+      ],
+      "correcta": "a",
+      "orden": 5
+    },
+    {
+      "enunciado": "Que propiedad mide la capacidad de una roca para permitir el flujo de fluidos?",
+      "opciones": ["Porosidad", "Permeabilidad", "Saturacion", "Mojabilidad"],
+      "correcta": "b",
+      "orden": 6
+    },
+    {
+      "enunciado": "En una trampa estructural anticlinal, el hidrocarburo se acumula:",
+      "opciones": [
+        "En los flancos mas profundos del pliegue",
+        "En la cresta del pliegue, debajo del sello",
+        "Fuera de la estructura",
+        "Solo en fallas normales"
+      ],
+      "correcta": "b",
+      "orden": 7
+    },
+    {
+      "enunciado": "La ventana de petroleo corresponde aproximadamente al rango de temperatura de:",
+      "opciones": ["10-30 C", "60-120 C", "200-260 C", "300-400 C"],
+      "correcta": "b",
+      "orden": 8
+    },
+    {
+      "enunciado": "Que fluido de perforacion es preferible en formaciones arcillosas sensibles al agua?",
+      "opciones": [
+        "Lodo base agua sin inhibidores",
+        "Lodo base aceite o sintetico",
+        "Agua dulce",
+        "Aire seco"
+      ],
+      "correcta": "b",
+      "orden": 9
+    },
+    {
+      "enunciado": "El API Gravity se utiliza para clasificar el crudo segun su:",
+      "opciones": ["Contenido de azufre", "Densidad relativa", "Color", "Punto de congelacion"],
+      "correcta": "b",
+      "orden": 10
+    }
+  ]
+}

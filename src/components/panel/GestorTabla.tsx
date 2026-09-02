@@ -106,6 +106,8 @@ interface Props {
   columnasExtra?: readonly { etiqueta: string; render: (registro: Registro) => string }[];
   /** Boton de accion rapida por fila (p. ej. aceptar/suspender un alumno). Recibe una funcion para recargar. */
   accionRapida?: (registro: Registro, recargar: () => void) => ReactNode;
+  /** Contenido extra en la cabecera, a la izquierda del boton "+ Nuevo" (p. ej. importar desde archivo). */
+  accionCabecera?: ReactNode;
 }
 
 function valorInicial(campos: readonly CampoConfig[]): Record<string, unknown> {
@@ -116,7 +118,7 @@ function valorInicial(campos: readonly CampoConfig[]): Record<string, unknown> {
   return base;
 }
 
-export default function GestorTabla({ titulo, descripcion, tabla, campos, registros, relaciones, onCambio, soloLectura = false, columnasExtra = [], accionRapida }: Props) {
+export default function GestorTabla({ titulo, descripcion, tabla, campos, registros, relaciones, onCambio, soloLectura = false, columnasExtra = [], accionRapida, accionCabecera }: Props) {
   const [abierto, setAbierto] = useState<boolean>(false);
   const [editando, setEditando] = useState<Registro | null>(null);
   const [formulario, setFormulario] = useState<Record<string, unknown>>(() => valorInicial(campos));
@@ -194,11 +196,14 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
           <h2 id={`titulo-${tabla}`} className="text-xl font-extrabold tracking-tight text-night">{titulo}</h2>
           <p className="mt-1 text-sm text-slate-500">{descripcion}</p>
         </div>
-        {!soloLectura && (
-          <button type="button" onClick={abrirNuevo} className="cta">
-            + Nuevo
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          {accionCabecera}
+          {!soloLectura && (
+            <button type="button" onClick={abrirNuevo} className="cta">
+              + Nuevo
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="mt-6 overflow-x-auto">

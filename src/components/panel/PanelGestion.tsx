@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import GestorTabla from './GestorTabla';
+import ImportadorExamen from './ImportadorExamen';
 import type { CampoConfig, OpcionCampo, Registro } from './tipos';
 import { CATEGORIAS, NIVELES, TIPOS_ITEM, type Rol } from '@/lib/types';
 
@@ -247,8 +248,9 @@ export default function PanelGestion({ rol }: Props) {
         columnasExtra={[{ etiqueta: 'Curso', render: (r) => cursoPorTema(r.tema_id) }]} />
     ),
     examenes: (
-      <GestorTabla titulo="Examenes de modulo" descripcion="Examen final por modulo: 10 preguntas de opcion multiple. La respuesta correcta nunca se envia al alumno."
+      <GestorTabla titulo="Examenes de modulo" descripcion="Examen final por modulo: preguntas de opcion multiple. Puedes cargarlas una a una o importar un .json. La respuesta correcta nunca se envia al alumno."
         tabla="preguntas" campos={CAMPOS_PREGUNTA} registros={datos.preguntas} relaciones={relaciones} onCambio={() => void cargar()}
+        accionCabecera={<ImportadorExamen modulos={relaciones.modulo_id} onCambio={() => void cargar()} />}
         columnasExtra={[
           { etiqueta: 'Curso', render: (r) => cursoPorModulo(r.modulo_id) },
           { etiqueta: 'Correcta', render: (r) => String(r.correcta ?? '-').toUpperCase() },

@@ -61,6 +61,35 @@ El alumno rinde el examen al final de cada modulo en `/cursos/[slug]` (solo con 
 La correccion ocurre en el servidor (`POST /api/examen`): `preguntas.correcta` **nunca** se envia al
 navegador. Se aprueba con 70% y cada intento queda en `intentos_examen`.
 
+#### Importar un examen desde `.json`
+
+En **`/admin` > Examenes** el boton **Importar JSON** abre un dialogo: eliges el modulo, subes el
+archivo y decides si reemplazar las preguntas actuales o agregarlas. El servidor
+(`POST /api/examenes/importar`) valida todo antes de guardar; si algo falla no se importa nada y
+se listan los problemas por numero de pregunta. Maximo 100 preguntas por archivo.
+
+Formato aceptado (un arreglo de preguntas, o un objeto con la clave `preguntas`):
+
+```json
+{
+  "preguntas": [
+    {
+      "enunciado": "Cual es la funcion principal del lodo de perforacion?",
+      "opciones": ["Enfriar y lubricar la barrena", "Generar electricidad", "Combustible", "Pintura"],
+      "correcta": "a",
+      "orden": 1
+    }
+  ]
+}
+```
+
+- `enunciado` (obligatorio) &mdash; tambien vale `pregunta` o `texto`.
+- Opciones: `opciones` (arreglo de **4**) o los campos sueltos `opcion_a`&hellip;`opcion_d` (o `a`&hellip;`d`).
+- `correcta` (obligatorio): `"a"`&ndash;`"d"` o un numero `1`&ndash;`4`. Alias: `respuesta`, `respuesta_correcta`, `answer`.
+- `orden` (opcional): si falta, se usa la posicion en el archivo.
+
+Hay una plantilla lista para editar en `supabase/examen-ejemplo.json` (tambien se descarga desde el dialogo).
+
 ## 3. Desarrollo
 
 ```bash
@@ -104,6 +133,7 @@ Curso -> Modulo -> Tema -> Item
 | `PATCH` / `DELETE` | `/api/recursos/[tabla]/[id]` | Editar / eliminar |
 | `POST` | `/api/uploads` | Sube una imagen al bucket `portadas` y devuelve su URL publica (solo `admin` / `profesor`) |
 | `POST` | `/api/examen` | Corrige el examen de un modulo en el servidor |
+| `POST` | `/api/examenes/importar` | Importa preguntas de un modulo desde un JSON (solo `admin` / `profesor`) |
 
 Tablas permitidas: `usuarios`, `cursos`, `modulos`, `temas`, `items`, `curso_profesores`, `inscripciones`, `preguntas`.
 La escritura esta restringida por rol (`admin` total; `profesor` sobre modulos, temas, items y preguntas).
