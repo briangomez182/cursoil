@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Paginacion, { REGISTROS_POR_PAGINA } from '@/components/Paginacion';
 import { CATEGORIAS, NIVELES, type Curso, type Usuario } from '@/lib/types';
 
 interface Props {
@@ -22,10 +23,21 @@ const tarjeta = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 };
 
+const ORDENES: readonly { valor: string; etiqueta: string }[] = [
+  { valor: '', etiqueta: 'Ordenar' },
+  { valor: 'titulo', etiqueta: 'Titulo A-Z' },
+  { valor: 'titulo-desc', etiqueta: 'Titulo Z-A' },
+  { valor: 'duracion', etiqueta: 'Menor duracion' },
+  { valor: 'duracion-desc', etiqueta: 'Mayor duracion' },
+  { valor: 'nivel', etiqueta: 'Por nivel' },
+];
+
 export default function CatalogoCursos({ cursos, profesores, asignaciones, ilustracion }: Props) {
   const [texto, setTexto] = useState<string>('');
   const [categoria, setCategoria] = useState<string>('');
   const [nivel, setNivel] = useState<string>('');
+  const [ordenar, setOrdenar] = useState<string>('');
+  const [pagina, setPagina] = useState<number>(1);
 
   const nombrePorId: Record<string, string> = useMemo(
     () => Object.fromEntries(profesores.map((p) => [p.id, p.nombre])),
@@ -34,7 +46,7 @@ export default function CatalogoCursos({ cursos, profesores, asignaciones, ilust
 
   const filtrados: Curso[] = useMemo(() => {
     const q: string = texto.trim().toLowerCase();
-    return cursos.filter((c) => {
+    const lista = cursos.filter((c) => {
       const coincideTexto: boolean =
         q.length === 0 ||
         c.titulo.toLowerCase().includes(q) ||
@@ -44,7 +56,40 @@ export default function CatalogoCursos({ cursos, profesores, asignaciones, ilust
       const coincideNivel: boolean = nivel === '' || c.nivel === nivel;
       return coincideTexto && coincideCategoria && coincideNivel;
     });
-  }, [cursos, texto, categoria, nivel]);
+
+    const ordenado = [...lista];
+    switch (ordenar) {
+      case 'titulo':
+        ordenado.sort((a, b) => a.titulo.localeCompare(b.titulo, 'es'));
+        break;
+      case 'titulo-desc':
+        ordenado.sort((a, b) => b.titulo.localeCompare(a.titulo, 'es'));
+        break;
+      case 'duracion':
+        ordenado.sort((a, b) => a.duracion_horas - b.duracion_horas);
+        break;
+      case 'duracion-desc':
+        ordenado.sort((a, b) => b.duracion_horas - a.duracion_horas);
+        break;
+      case 'nivel':
+        ordenado.sort((a, b) => NIVELES.indexOf(a.nivel) - NIVELES.indexOf(b.nivel));
+        break;
+      default:
+        break;
+    }
+    return ordenado;
+  }, [cursos, texto, categoria, nivel, ordenar]);
+
+  useEffect(() => {
+    setPagina(1);
+  }, [texto, categoria, nivel, ordenar]);
+
+  const totalPaginas: number = Math.max(1, Math.ceil(filtrados.length / REGISTROS_POR_PAGINA));
+  const paginaActual: number = Math.min(pagina, totalPaginas);
+  const filtradosPagina: Curso[] = useMemo(
+    () => filtrados.slice((paginaActual - 1) * REGISTROS_POR_PAGINA, paginaActual * REGISTROS_POR_PAGINA),
+    [filtrados, paginaActual],
+  );
 
   return (
     <>
@@ -89,6 +134,15 @@ export default function CatalogoCursos({ cursos, profesores, asignaciones, ilust
           </select>
         </label>
 
+        <label className="border-slate-100 px-4 sm:border-l">
+          <span className="sr-only">Ordenar por</span>
+          <select value={ordenar} onChange={(e) => setOrdenar(e.target.value)} className="w-full bg-transparent py-2 text-sm font-semibold text-slate-600 outline-none">
+            {ORDENES.map((o) => (
+              <option key={o.valor} value={o.valor}>{o.etiqueta}</option>
+            ))}
+          </select>
+        </label>
+
         <button type="submit" className="cta sm:px-8">Buscar</button>
       </form>
 
@@ -101,13 +155,14 @@ export default function CatalogoCursos({ cursos, profesores, asignaciones, ilust
 
       {/* Grilla */}
       <motion.div
+        key={paginaActual}
         variants={contenedor}
         initial="oculto"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
         className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
       >
-        {filtrados.map((curso) => (
+        {filtradosPagina.map((curso) => (
           <motion.article
             key={curso.id}
             variants={tarjeta}
@@ -177,6 +232,8 @@ export default function CatalogoCursos({ cursos, profesores, asignaciones, ilust
           </p>
         )}
       </motion.div>
+
+      <Paginacion pagina={paginaActual} totalPaginas={totalPaginas} onCambiar={setPagina} />
     </>
   );
 }

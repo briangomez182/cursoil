@@ -1,8 +1,39 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import Paginacion, { REGISTROS_POR_PAGINA } from '@/components/Paginacion';
 import type { CampoConfig, OpcionCampo, Registro } from './tipos';
+
+type DireccionOrden = 'asc' | 'desc';
+interface EstadoOrden {
+  indice: number;
+  dir: DireccionOrden;
+}
+
+/** Opciones (relacion o lista fija) de un campo, para traducir su valor a la etiqueta visible. */
+function opcionesDeCampo(
+  campo: CampoConfig,
+  relaciones: Record<string, readonly OpcionCampo[]>,
+): readonly OpcionCampo[] {
+  if (campo.relacion) return relaciones[campo.nombre] ?? [];
+  return campo.opciones ?? [];
+}
+
+/** Texto completo (sin recortar) que se ve en la celda de un campo: base para filtrar y ordenar. */
+function textoDeCampo(
+  registro: Registro,
+  campo: CampoConfig,
+  relaciones: Record<string, readonly OpcionCampo[]>,
+): string {
+  const valor = registro[campo.nombre];
+  if (campo.tipo === 'booleano') return valor ? 'Si' : 'No';
+  if (campo.relacion || campo.opciones) {
+    const opcion = opcionesDeCampo(campo, relaciones).find((o) => o.valor === String(valor));
+    if (opcion) return opcion.etiqueta;
+  }
+  return valor === null || valor === undefined ? '' : String(valor);
+}
 
 /** Campo de imagen: sube el archivo al bucket de Supabase y guarda la URL publica resultante. */
 function CampoImagen({
@@ -124,12 +155,70 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
   const [formulario, setFormulario] = useState<Record<string, unknown>>(() => valorInicial(campos));
   const [error, setError] = useState<string>('');
   const [guardando, setGuardando] = useState<boolean>(false);
+  const [pagina, setPagina] = useState<number>(1);
+  const [filtro, setFiltro] = useState<string>('');
+  const [orden, setOrden] = useState<EstadoOrden | null>(null);
 
   const columnas: CampoConfig[] = useMemo(() => campos.filter((c) => c.enTabla !== false).slice(0, 4), [campos]);
 
+  /** Encabezados ordenables: primero las columnas del formulario, luego las columnas calculadas. */
+  const columnasOrden = useMemo(
+    () => [
+      ...columnas.map((c) => ({
+        etiqueta: c.etiqueta,
+        numerico: c.tipo === 'numero',
+        valor: (r: Registro) => textoDeCampo(r, c, relaciones),
+      })),
+      ...columnasExtra.map((c) => ({
+        etiqueta: c.etiqueta,
+        numerico: false,
+        valor: (r: Registro) => c.render(r),
+      })),
+    ],
+    [columnas, columnasExtra, relaciones],
+  );
+
+  /** Registros tras aplicar el filtro rapido y el orden por columna. */
+  const registrosFiltrados: Registro[] = useMemo(() => {
+    const q: string = filtro.trim().toLowerCase();
+    let salida: Registro[] = q
+      ? registros.filter((r) => columnasOrden.some((col) => col.valor(r).toLowerCase().includes(q)))
+      : registros.slice();
+
+    const col = orden ? columnasOrden[orden.indice] : undefined;
+    if (orden && col) {
+      const factor: number = orden.dir === 'asc' ? 1 : -1;
+      salida = salida.slice().sort((a, b) => {
+        const va: string = col.valor(a);
+        const vb: string = col.valor(b);
+        if (col.numerico) return factor * ((Number(va) || 0) - (Number(vb) || 0));
+        return factor * va.localeCompare(vb, 'es', { numeric: true, sensitivity: 'base' });
+      });
+    }
+    return salida;
+  }, [registros, filtro, orden, columnasOrden]);
+
+  const totalPaginas: number = Math.max(1, Math.ceil(registrosFiltrados.length / REGISTROS_POR_PAGINA));
+  const paginaActual: number = Math.min(pagina, totalPaginas);
+  const registrosPagina: Registro[] = useMemo(
+    () => registrosFiltrados.slice((paginaActual - 1) * REGISTROS_POR_PAGINA, paginaActual * REGISTROS_POR_PAGINA),
+    [registrosFiltrados, paginaActual],
+  );
+
+  useEffect(() => {
+    setPagina(1);
+  }, [filtro, orden]);
+
   function opcionesDe(campo: CampoConfig): readonly OpcionCampo[] {
-    if (campo.relacion) return relaciones[campo.nombre] ?? [];
-    return campo.opciones ?? [];
+    return opcionesDeCampo(campo, relaciones);
+  }
+
+  /** Ciclo de orden al clicar un encabezado: sin orden -> asc -> desc -> sin orden. */
+  function alClicOrden(indice: number): void {
+    setOrden((actual) => {
+      if (!actual || actual.indice !== indice) return { indice, dir: 'asc' };
+      return actual.dir === 'asc' ? { indice, dir: 'desc' } : null;
+    });
   }
 
   function abrirNuevo(): void {
@@ -179,13 +268,8 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
   }
 
   function mostrar(registro: Registro, campo: CampoConfig): string {
-    const valor = registro[campo.nombre];
-    if (campo.tipo === 'booleano') return valor ? 'Si' : 'No';
-    if (campo.relacion || campo.opciones) {
-      const opcion = opcionesDe(campo).find((o) => o.valor === String(valor));
-      if (opcion) return opcion.etiqueta;
-    }
-    const texto: string = valor === null || valor === undefined ? '-' : String(valor);
+    const texto: string = textoDeCampo(registro, campo, relaciones);
+    if (texto === '') return '-';
     return texto.length > 70 ? `${texto.slice(0, 70)}...` : texto;
   }
 
@@ -197,6 +281,16 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
           <p className="mt-1 text-sm text-slate-500">{descripcion}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          {registros.length > 0 && (
+            <input
+              type="search"
+              value={filtro}
+              onChange={(e) => setFiltro(e.target.value)}
+              placeholder="Filtrar..."
+              aria-label={`Filtrar ${titulo.toLowerCase()}`}
+              className="w-40 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-night outline-none transition placeholder:text-slate-400 focus:border-petro-500 focus:ring-4 focus:ring-petro-100"
+            />
+          )}
           {accionCabecera}
           {!soloLectura && (
             <button type="button" onClick={abrirNuevo} className="cta">
@@ -210,17 +304,29 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
         <table className="w-full min-w-[560px] border-separate border-spacing-y-2 text-left">
           <thead>
             <tr className="text-[11px] uppercase tracking-wider text-slate-400">
-              {columnas.map((c) => (
-                <th key={c.nombre} className="px-4 pb-1 font-bold">{c.etiqueta}</th>
-              ))}
-              {columnasExtra.map((c) => (
-                <th key={c.etiqueta} className="px-4 pb-1 font-bold">{c.etiqueta}</th>
-              ))}
+              {columnasOrden.map((c, i) => {
+                const activo: boolean = orden?.indice === i;
+                return (
+                  <th key={`${c.etiqueta}-${i}`} className="px-4 pb-1 font-bold">
+                    <button
+                      type="button"
+                      onClick={() => alClicOrden(i)}
+                      className="inline-flex items-center gap-1 uppercase tracking-wider transition hover:text-night"
+                      aria-label={`Ordenar por ${c.etiqueta}`}
+                    >
+                      {c.etiqueta}
+                      <span aria-hidden="true" className={activo ? 'text-petro-600' : 'text-slate-300'}>
+                        {activo ? (orden?.dir === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </button>
+                  </th>
+                );
+              })}
               <th className="px-4 pb-1 text-right font-bold">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {registros.map((registro) => (
+            {registrosPagina.map((registro) => (
               <tr key={registro.id} className="bg-petro-50/60 text-sm text-night">
                 {columnas.map((c, i) => (
                   <td key={c.nombre} className={`px-4 py-3 ${i === 0 ? 'rounded-l-2xl font-semibold' : 'text-slate-600'}`}>
@@ -249,14 +355,23 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
             ))}
             {registros.length === 0 && (
               <tr>
-                <td colSpan={columnas.length + columnasExtra.length + 1} className="rounded-2xl bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+                <td colSpan={columnasOrden.length + 1} className="rounded-2xl bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
                   Aun no hay registros. Crea el primero con el boton &ldquo;Nuevo&rdquo;.
+                </td>
+              </tr>
+            )}
+            {registros.length > 0 && registrosFiltrados.length === 0 && (
+              <tr>
+                <td colSpan={columnasOrden.length + 1} className="rounded-2xl bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+                  Ningun registro coincide con &ldquo;{filtro}&rdquo;.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <Paginacion pagina={paginaActual} totalPaginas={totalPaginas} onCambiar={setPagina} />
 
       <AnimatePresence>
         {abierto && (

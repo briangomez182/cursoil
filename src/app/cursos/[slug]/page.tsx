@@ -6,6 +6,7 @@ import Aparecer from '@/components/Aparecer';
 import VisorItem from '@/components/VisorItem';
 import ExamenModulo from '@/components/ExamenModulo';
 import BotonSalir from '@/components/BotonSalir';
+import FiltroModulos from '@/components/FiltroModulos';
 import { listarCursosPublicos, listarItems, listarModulos, listarPreguntasPublicas, listarTemas } from '@/lib/data';
 import { getSesion } from '@/lib/session';
 import type { Item, Modulo, PreguntaPublica, Tema } from '@/lib/types';
@@ -82,12 +83,16 @@ export default async function PaginaCurso({ params }: { params: { slug: string }
               </Aparecer>
             )}
 
-            {misModulos.map((modulo) => {
-              const misTemas: Tema[] = temas.filter((t) => t.modulo_id === modulo.id);
-              const susPreguntas: PreguntaPublica[] = preguntas.filter((p) => p.modulo_id === modulo.id);
-              return (
+            {misModulos.length > 0 && (
+              <FiltroModulos
+                modulos={misModulos.map((modulo) => {
+                  const misTemas: Tema[] = temas.filter((t) => t.modulo_id === modulo.id);
+                  const susPreguntas: PreguntaPublica[] = preguntas.filter((p) => p.modulo_id === modulo.id);
+                  return {
+                    id: modulo.id,
+                    texto: `${modulo.titulo} ${modulo.descripcion ?? ''} ${misTemas.map((t) => t.titulo).join(' ')}`,
+                    nodo: (
                 <section
-                  key={modulo.id}
                   aria-labelledby={`mod-${modulo.id}`}
                   className={puedeVerContenido ? undefined : 'rounded-[2rem] border border-slate-100 bg-white p-6 shadow-card sm:p-8'}
                 >
@@ -136,8 +141,11 @@ export default async function PaginaCurso({ params }: { params: { slug: string }
                     </ul>
                   )}
                 </section>
-              );
-            })}
+                    ),
+                  };
+                })}
+              />
+            )}
 
             {misModulos.length === 0 && (
               <div className="rounded-[2rem] border border-slate-100 bg-white p-12 text-center shadow-card">
