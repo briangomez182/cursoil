@@ -1,5 +1,5 @@
 -- ============================================================
--- PetroLearn | Esquema relacional para Supabase (PostgreSQL)
+-- Cursoil | Esquema relacional para Supabase (PostgreSQL)
 -- Ejecutar completo en: Supabase Dashboard > SQL Editor > New query
 -- ============================================================
 
@@ -17,6 +17,8 @@ create table if not exists public.usuarios (
   bio           text,
   avatar_url    text,
   telefono      text,
+  -- Alumnos: se registran con activo = false y un admin los acepta poniendolo en true.
+  -- Profesores / admin: se crean activos.
   activo        boolean not null default true,
   creado_en     timestamptz not null default now()
 );
@@ -86,9 +88,37 @@ create table if not exists public.inscripciones (
   unique (curso_id, alumno_id)
 );
 
+-- ---------- Preguntas del examen final de cada modulo ----------
+-- 10 preguntas por modulo, cada una con 4 opciones (a, b, c, d) y una correcta.
+create table if not exists public.preguntas (
+  id         uuid primary key default gen_random_uuid(),
+  modulo_id  uuid not null references public.modulos(id) on delete cascade,
+  enunciado  text not null,
+  opcion_a   text not null,
+  opcion_b   text not null,
+  opcion_c   text not null,
+  opcion_d   text not null,
+  correcta   text not null default 'a' check (correcta in ('a','b','c','d')),
+  orden      int not null default 1,
+  creado_en  timestamptz not null default now()
+);
+
+-- ---------- Intentos de examen de los alumnos ----------
+create table if not exists public.intentos_examen (
+  id         uuid primary key default gen_random_uuid(),
+  modulo_id  uuid not null references public.modulos(id) on delete cascade,
+  alumno_id  uuid not null references public.usuarios(id) on delete cascade,
+  puntaje    int not null default 0,
+  total      int not null default 10,
+  aprobado   boolean not null default false,
+  creado_en  timestamptz not null default now()
+);
+
 create index if not exists idx_modulos_curso on public.modulos(curso_id);
 create index if not exists idx_temas_modulo on public.temas(modulo_id);
 create index if not exists idx_items_tema on public.items(tema_id);
+create index if not exists idx_preguntas_modulo on public.preguntas(modulo_id);
+create index if not exists idx_intentos_modulo_alumno on public.intentos_examen(modulo_id, alumno_id);
 
 -- ============================================================
 -- RLS: el servidor de Next.js usa la SERVICE ROLE KEY (la ignora).
@@ -101,6 +131,8 @@ alter table public.temas            enable row level security;
 alter table public.items            enable row level security;
 alter table public.curso_profesores enable row level security;
 alter table public.inscripciones    enable row level security;
+alter table public.preguntas        enable row level security;
+alter table public.intentos_examen  enable row level security;
 
 drop policy if exists "lectura publica cursos" on public.cursos;
 create policy "lectura publica cursos" on public.cursos for select using (publicado = true);
@@ -116,3 +148,20 @@ create policy "lectura publica items" on public.items for select using (true);
 
 drop policy if exists "lectura publica asignaciones" on public.curso_profesores;
 create policy "lectura publica asignaciones" on public.curso_profesores for select using (true);
+
+-- OJO: `preguntas` e `intentos_examen` NO tienen politica de lectura publica a proposito.
+-- La respuesta correcta (preguntas.correcta) solo se lee en el servidor con la SERVICE ROLE KEY;
+-- nunca se envia al navegador. La correccion del examen ocurre en /api/examen.
+
+-- ============================================================
+-- Storage: bucket publico para las portadas de los cursos.
+-- El servidor de Next.js sube con la SERVICE ROLE KEY (ignora RLS);
+-- aqui solo se asegura el bucket y la lectura publica de los archivos.
+-- ============================================================
+insert into storage.buckets (id, name, public)
+values ('portadas', 'portadas', true)
+on conflict (id) do nothing;
+
+drop policy if exists "lectura publica portadas" on storage.objects;
+create policy "lectura publica portadas" on storage.objects
+  for select using (bucket_id = 'portadas');

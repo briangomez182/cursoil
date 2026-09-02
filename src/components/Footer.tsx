@@ -6,7 +6,7 @@ export default function Footer() {
   const anio: number = new Date().getFullYear();
 
   return (
-    <footer className="mt-16 rounded-t-[2.5rem] bg-night px-6 py-14 text-slate-300 sm:px-12">
+    <footer className="mt-16 bg-night px-6 py-14 text-slate-300 sm:px-12">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
         <section>
           <div className="rounded-3xl bg-white/95 p-4">
@@ -56,7 +56,7 @@ export default function Footer() {
       </div>
 
       <div className="mx-auto mt-12 flex max-w-7xl flex-col gap-3 border-t border-white/10 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-        <p>&copy; {anio} PetroLearn. Todos los derechos reservados.</p>
+        <p>&copy; {anio} Cursoil. Todos los derechos reservados.</p>
         <p>Hecho en {PLATAFORMA.ciudad}, {PLATAFORMA.pais}.</p>
       </div>
     </footer>

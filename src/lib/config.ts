@@ -1,5 +1,5 @@
 export const PLATAFORMA = {
-  nombre: 'PetroLearn',
+  nombre: 'Cursoil',
   eslogan: 'Cursos de la Industria Petrolera',
   ciudad: 'Puerto Piritu',
   estado: 'Anzoategui',
@@ -7,5 +7,5 @@ export const PLATAFORMA = {
   telefono: '+584127960996',
   telefonoLegible: '+58 412-796 0996',
   whatsapp: 'https://wa.me/584127960996',
-  email: 'contacto@petrolearn.com.ve',
+  email: 'contacto@cursoil.com.ve',
 } as const;

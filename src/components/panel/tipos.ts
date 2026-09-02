@@ -1,4 +1,4 @@
-export type TipoCampo = 'texto' | 'textarea' | 'numero' | 'select' | 'booleano' | 'password' | 'markdown';
+export type TipoCampo = 'texto' | 'textarea' | 'numero' | 'select' | 'booleano' | 'password' | 'markdown' | 'imagen';
 
 export interface OpcionCampo {
   valor: string;

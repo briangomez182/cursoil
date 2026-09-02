@@ -1,5 +1,5 @@
 /**
- * Seed de PetroLearn.
+ * Seed de Cursoil.
  * 1) Ejecuta supabase/schema.sql en el SQL Editor de Supabase.
  * 2) Completa .env.local
  * 3) node --env-file=.env.local supabase/seed.mjs
@@ -23,10 +23,10 @@ const hash = (plano) => {
 const db = createClient(url, key, { auth: { persistSession: false } });
 
 const usuarios = [
-  { usuario: 'admin', nombre: 'Administrador PetroLearn', email: 'admin@petrolearn.com.ve', rol: 'admin', password_hash: hash('admin'), especialidad: 'Direccion academica' },
-  { usuario: 'jmendoza', nombre: 'Ing. Jose Mendoza', email: 'j.mendoza@petrolearn.com.ve', rol: 'profesor', password_hash: hash('profesor123'), especialidad: 'Perforacion y Completacion de Pozos', bio: 'Veinte anos en operaciones upstream en la Faja Petrolifera del Orinoco.' },
-  { usuario: 'lrivas', nombre: 'Ing. Luisa Rivas', email: 'l.rivas@petrolearn.com.ve', rol: 'profesor', password_hash: hash('profesor123'), especialidad: 'Refinacion y Procesos Downstream', bio: 'Especialista en destilacion atmosferica y craqueo catalitico.' },
-  { usuario: 'cbastidas', nombre: 'Lic. Carlos Bastidas', email: 'c.bastidas@petrolearn.com.ve', rol: 'profesor', password_hash: hash('profesor123'), especialidad: 'Seguridad Industrial y Ambiente', bio: 'Auditor SIAHO certificado, formador en normativa COVENIN y API.' },
+  { usuario: 'admin', nombre: 'Administrador Cursoil', email: 'admin@cursoil.com.ve', rol: 'admin', password_hash: hash('admin'), especialidad: 'Direccion academica' },
+  { usuario: 'jmendoza', nombre: 'Ing. Jose Mendoza', email: 'j.mendoza@cursoil.com.ve', rol: 'profesor', password_hash: hash('profesor123'), especialidad: 'Perforacion y Completacion de Pozos', bio: 'Veinte anos en operaciones upstream en la Faja Petrolifera del Orinoco.' },
+  { usuario: 'lrivas', nombre: 'Ing. Luisa Rivas', email: 'l.rivas@cursoil.com.ve', rol: 'profesor', password_hash: hash('profesor123'), especialidad: 'Refinacion y Procesos Downstream', bio: 'Especialista en destilacion atmosferica y craqueo catalitico.' },
+  { usuario: 'cbastidas', nombre: 'Lic. Carlos Bastidas', email: 'c.bastidas@cursoil.com.ve', rol: 'profesor', password_hash: hash('profesor123'), especialidad: 'Seguridad Industrial y Ambiente', bio: 'Auditor SIAHO certificado, formador en normativa COVENIN y API.' },
 ];
 
 const cursos = [
@@ -43,6 +43,25 @@ const fallar = (etiqueta, error) => {
     console.error(`Error en ${etiqueta}:`, error.message);
     process.exit(1);
   }
+};
+
+/** 10 preguntas de PRUEBA para el examen final de un modulo (4 opciones, 1 correcta). */
+const preguntasDePrueba = (modulo) => {
+  const tema = String(modulo.titulo).replace(/^M[oó]dulo\s*\d+\s*[-:]\s*/i, '').trim() || modulo.titulo;
+  const letras = ['a', 'b', 'c', 'd'];
+  return Array.from({ length: 10 }, (_, i) => {
+    const n = i + 1;
+    return {
+      modulo_id: modulo.id,
+      enunciado: `Pregunta ${n} de prueba sobre "${tema}": selecciona la opcion correcta.`,
+      opcion_a: `Opcion A de prueba - pregunta ${n} (${tema})`,
+      opcion_b: `Opcion B de prueba - pregunta ${n} (${tema})`,
+      opcion_c: `Opcion C de prueba - pregunta ${n} (${tema})`,
+      opcion_d: `Opcion D de prueba - pregunta ${n} (${tema})`,
+      correcta: letras[i % 4],
+      orden: n,
+    };
+  });
 };
 
 const { data: usuariosCreados, error: e1 } = await db
@@ -102,6 +121,25 @@ const { error: e6 } = await db.from('items').upsert(
   { onConflict: 'id' },
 );
 fallar('items', e6);
+
+// Examen final de PRUEBA para cada modulo que aun no tenga preguntas.
+const { data: todosModulos, error: e7 } = await db.from('modulos').select('id,titulo');
+fallar('modulos (examenes)', e7);
+
+let modulosConExamen = 0;
+for (const modulo of todosModulos ?? []) {
+  const { count, error: ec } = await db
+    .from('preguntas')
+    .select('*', { count: 'exact', head: true })
+    .eq('modulo_id', modulo.id);
+  fallar('preguntas (conteo)', ec);
+  if ((count ?? 0) > 0) continue;
+
+  const { error: ep } = await db.from('preguntas').insert(preguntasDePrueba(modulo));
+  fallar('preguntas', ep);
+  modulosConExamen += 1;
+}
+console.log(`Examenes de prueba creados: ${modulosConExamen} modulo(s) x 10 preguntas`);
 
 console.log('\nSeed completado.');
 console.log('Admin   -> usuario: admin      | clave: admin');

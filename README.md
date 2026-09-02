@@ -1,4 +1,4 @@
-# PetroLearn | Cursos de la Industria Petrolera
+# Cursoil | Cursos de la Industria Petrolera
 
 Plataforma educativa de formacion industrial construida con **Next.js 14 (App Router)**, **TypeScript**,
 **Tailwind CSS**, **Framer Motion**, **Three.js (@react-three/fiber + drei)** y **Supabase**.
@@ -39,6 +39,27 @@ npm run seed
 | Profesor 3 | `cbastidas` | `profesor123` |
 
 > Sin Supabase configurado la landing funciona con contenido demo y `admin/admin` entra al panel.
+
+### Imagenes de portada (Storage)
+
+El `schema.sql` crea el bucket publico **`portadas`**. Desde `/admin > Cursos` el administrador
+sube una imagen por curso (campo **Imagen de portada**); el archivo se guarda en ese bucket via
+`POST /api/uploads` y la URL publica queda en `cursos.portada_url`, que se muestra en la tarjeta
+del curso en la home y en la cabecera de `/cursos/[slug]`. Si prefieres crearlo a mano:
+**Storage > New bucket > `portadas` > Public**.
+
+### Examen final por modulo
+
+Cada modulo tiene un **examen final** de 10 preguntas de opcion multiple (4 opciones, 1 correcta).
+
+1. Ejecuta el `schema.sql` actualizado (crea `preguntas` e `intentos_examen`; es idempotente).
+2. `npm run seed` inserta **10 preguntas de prueba por modulo** que aun no tenga examen
+   (no pisa las que ya cargaste).
+3. Gestiona las preguntas reales en **`/admin` > pestana Examenes** (tambien disponible para profesores).
+
+El alumno rinde el examen al final de cada modulo en `/cursos/[slug]` (solo con sesion de alumno).
+La correccion ocurre en el servidor (`POST /api/examen`): `preguntas.correcta` **nunca** se envia al
+navegador. Se aprueba con 70% y cada intento queda en `intentos_examen`.
 
 ## 3. Desarrollo
 
@@ -81,9 +102,28 @@ Curso -> Modulo -> Tema -> Item
 | `POST` | `/api/auth/logout` | Cierre de sesion |
 | `GET` / `POST` | `/api/recursos/[tabla]` | Listar / crear |
 | `PATCH` / `DELETE` | `/api/recursos/[tabla]/[id]` | Editar / eliminar |
+| `POST` | `/api/uploads` | Sube una imagen al bucket `portadas` y devuelve su URL publica (solo `admin` / `profesor`) |
+| `POST` | `/api/examen` | Corrige el examen de un modulo en el servidor |
 
-Tablas permitidas: `usuarios`, `cursos`, `modulos`, `temas`, `items`, `curso_profesores`, `inscripciones`.
-La escritura esta restringida por rol (`admin` total; `profesor` sobre modulos, temas e items).
+Tablas permitidas: `usuarios`, `cursos`, `modulos`, `temas`, `items`, `curso_profesores`, `inscripciones`, `preguntas`.
+La escritura esta restringida por rol (`admin` total; `profesor` sobre modulos, temas, items y preguntas).
+
+### Rate limiting (`src/middleware.ts`)
+
+Todas las rutas `/api/*` pasan por un limitador por IP (ventana fija, en memoria, sin dependencias)
+para frenar bots y fuerza bruta. Al superar el limite se responde **429** con cabeceras
+`Retry-After` y `X-RateLimit-*`. Limites por defecto (ajustables en `REGLAS`):
+
+| Prefijo | Limite |
+| --- | --- |
+| `/api/auth/*` | 20 solicitudes / 5 min |
+| `/api/uploads` | 30 / 10 min |
+| `/api/examen` | 40 / 10 min |
+| resto de `/api/*` | 120 / min |
+
+El conteo vive en la instancia; si el hosting escala a varias, cada una lleva el suyo (frena igual
+a un bot desde una IP). Para un limite global exacto, cambiar el almacen por Upstash Redis / Vercel KV.
+Se puede desactivar con `RATE_LIMIT_DESACTIVADO=1` (util en pruebas).
 
 ## Notas tecnicas
 

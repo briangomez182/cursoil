@@ -3,8 +3,8 @@ import PozoAnimado from '@/components/PozoAnimado';
 
 export default function NoEncontrado() {
   return (
-    <div className="grid min-h-screen place-items-center px-4 py-10">
-      <main className="w-full max-w-3xl overflow-hidden rounded-[2.5rem] bg-white p-10 text-center shadow-soft sm:p-16">
+    <div className="grid min-h-screen place-items-center bg-white px-4 py-10">
+      <main className="w-full max-w-3xl overflow-hidden bg-white p-10 text-center sm:p-16">
         <PozoAnimado />
         <p className="chip mt-8">Error 404</p>
         <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-night sm:text-6xl">Pozo seco</h1>

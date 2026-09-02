@@ -1,8 +1,96 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CampoConfig, OpcionCampo, Registro } from './tipos';
+
+/** Campo de imagen: sube el archivo al bucket de Supabase y guarda la URL publica resultante. */
+function CampoImagen({
+  id,
+  valor,
+  carpeta,
+  onCambio,
+}: {
+  id: string;
+  valor: string;
+  carpeta: string;
+  onCambio: (url: string) => void;
+}) {
+  const [subiendo, setSubiendo] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+
+  async function alElegir(evento: React.ChangeEvent<HTMLInputElement>): Promise<void> {
+    const archivo = evento.target.files?.[0];
+    evento.target.value = '';
+    if (!archivo) return;
+
+    setSubiendo(true);
+    setError('');
+    const cuerpo = new FormData();
+    cuerpo.append('file', archivo);
+    cuerpo.append('carpeta', carpeta);
+
+    try {
+      const respuesta = await fetch('/api/uploads', { method: 'POST', body: cuerpo });
+      const datos = (await respuesta.json()) as { url?: string; error?: string };
+      if (!respuesta.ok || !datos.url) {
+        setError(datos.error ?? 'No se pudo subir la imagen.');
+        return;
+      }
+      onCambio(datos.url);
+    } catch {
+      setError('No se pudo subir la imagen. Revisa tu conexion.');
+    } finally {
+      setSubiendo(false);
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-slate-200 p-3">
+      {valor ? (
+        <div className="flex items-center gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={valor} alt="Vista previa de la portada" className="h-20 w-32 shrink-0 rounded-xl object-cover" />
+          <button
+            type="button"
+            onClick={() => onCambio('')}
+            className="rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-red-500 transition hover:bg-red-50"
+          >
+            Quitar
+          </button>
+        </div>
+      ) : (
+        <p className="text-xs text-slate-400">Aun no hay imagen cargada.</p>
+      )}
+
+      <label
+        htmlFor={id}
+        className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-petro-50 px-4 py-2 text-xs font-bold text-petro-700 transition hover:bg-petro-100 aria-disabled:opacity-60"
+        aria-disabled={subiendo}
+      >
+        {subiendo ? 'Subiendo...' : valor ? 'Reemplazar imagen' : 'Subir imagen'}
+        <input
+          id={id}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          disabled={subiendo}
+          onChange={(e) => void alElegir(e)}
+        />
+      </label>
+
+      <input
+        type="url"
+        value={valor}
+        placeholder="o pega una URL de imagen"
+        onChange={(e) => onCambio(e.target.value)}
+        className="campo mt-2 text-xs"
+      />
+
+      {error && <p className="mt-2 text-xs font-semibold text-red-600">{error}</p>}
+    </div>
+  );
+}
 
 interface Props {
   titulo: string;
@@ -14,6 +102,10 @@ interface Props {
   relaciones: Record<string, readonly OpcionCampo[]>;
   onCambio: () => void;
   soloLectura?: boolean;
+  /** Columnas adicionales de solo lectura, calculadas fuera del formulario (p. ej. curso al que pertenece). */
+  columnasExtra?: readonly { etiqueta: string; render: (registro: Registro) => string }[];
+  /** Boton de accion rapida por fila (p. ej. aceptar/suspender un alumno). Recibe una funcion para recargar. */
+  accionRapida?: (registro: Registro, recargar: () => void) => ReactNode;
 }
 
 function valorInicial(campos: readonly CampoConfig[]): Record<string, unknown> {
@@ -24,7 +116,7 @@ function valorInicial(campos: readonly CampoConfig[]): Record<string, unknown> {
   return base;
 }
 
-export default function GestorTabla({ titulo, descripcion, tabla, campos, registros, relaciones, onCambio, soloLectura = false }: Props) {
+export default function GestorTabla({ titulo, descripcion, tabla, campos, registros, relaciones, onCambio, soloLectura = false, columnasExtra = [], accionRapida }: Props) {
   const [abierto, setAbierto] = useState<boolean>(false);
   const [editando, setEditando] = useState<Registro | null>(null);
   const [formulario, setFormulario] = useState<Record<string, unknown>>(() => valorInicial(campos));
@@ -116,6 +208,9 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
               {columnas.map((c) => (
                 <th key={c.nombre} className="px-4 pb-1 font-bold">{c.etiqueta}</th>
               ))}
+              {columnasExtra.map((c) => (
+                <th key={c.etiqueta} className="px-4 pb-1 font-bold">{c.etiqueta}</th>
+              ))}
               <th className="px-4 pb-1 text-right font-bold">Acciones</th>
             </tr>
           </thead>
@@ -127,8 +222,14 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
                     {mostrar(registro, c)}
                   </td>
                 ))}
+                {columnasExtra.map((c) => (
+                  <td key={c.etiqueta} className="px-4 py-3 text-slate-600">
+                    {c.render(registro)}
+                  </td>
+                ))}
                 <td className="rounded-r-2xl px-4 py-3 text-right">
-                  <div className="inline-flex gap-2">
+                  <div className="inline-flex flex-wrap justify-end gap-2">
+                    {accionRapida?.(registro, onCambio)}
                     <button type="button" onClick={() => abrirEdicion(registro)} className="rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-petro-700 transition hover:bg-petro-100">
                       Editar
                     </button>
@@ -143,7 +244,7 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
             ))}
             {registros.length === 0 && (
               <tr>
-                <td colSpan={columnas.length + 1} className="rounded-2xl bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+                <td colSpan={columnas.length + columnasExtra.length + 1} className="rounded-2xl bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
                   Aun no hay registros. Crea el primero con el boton &ldquo;Nuevo&rdquo;.
                 </td>
               </tr>
@@ -189,6 +290,13 @@ export default function GestorTabla({ titulo, descripcion, tabla, campos, regist
                           value={String(valor ?? '')}
                           placeholder={campo.placeholder}
                           onChange={(e) => setFormulario((f) => ({ ...f, [campo.nombre]: e.target.value }))}
+                        />
+                      ) : campo.tipo === 'imagen' ? (
+                        <CampoImagen
+                          id={`${tabla}-${campo.nombre}`}
+                          valor={String(valor ?? '')}
+                          carpeta={tabla}
+                          onCambio={(url) => setFormulario((f) => ({ ...f, [campo.nombre]: url }))}
                         />
                       ) : campo.tipo === 'select' ? (
                         <select

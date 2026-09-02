@@ -12,8 +12,8 @@ interface Props {
 
 export default function MarcoAuth({ titulo, subtitulo, children, pie }: Props) {
   return (
-    <div className="grid min-h-screen place-items-center px-4 py-10">
-      <main className="w-full max-w-5xl overflow-hidden rounded-[2.5rem] bg-white shadow-soft lg:grid lg:grid-cols-2">
+    <div className="grid min-h-screen place-items-center bg-white px-4 py-10">
+      <main className="w-full max-w-5xl overflow-hidden bg-white lg:grid lg:grid-cols-2">
         <section className="p-8 sm:p-12">
           <Logo />
           <h1 className="mt-10 text-3xl font-extrabold tracking-tight text-night">{titulo}</h1>
@@ -38,7 +38,7 @@ export default function MarcoAuth({ titulo, subtitulo, children, pie }: Props) {
               &ldquo;La formacion tecnica es el activo que ningun barril reemplaza.&rdquo;
             </p>
             <footer className="mt-3 text-sm font-semibold text-petro-600">
-              Equipo PetroLearn - {PLATAFORMA.ciudad}, {PLATAFORMA.pais}
+              Equipo Cursoil - {PLATAFORMA.ciudad}, {PLATAFORMA.pais}
             </footer>
           </blockquote>
 

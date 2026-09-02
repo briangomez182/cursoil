@@ -5,13 +5,13 @@ import Logo from '@/components/Logo';
 import Aparecer from '@/components/Aparecer';
 import { PLATAFORMA } from '@/lib/config';
 
-export const metadata: Metadata = { title: 'Terminos y condiciones | PetroLearn' };
+export const metadata: Metadata = { title: 'Terminos y condiciones | Cursoil' };
 
 const SECCIONES: readonly { titulo: string; parrafos: string[] }[] = [
   {
     titulo: '1. Objeto del servicio',
     parrafos: [
-      'PetroLearn es una plataforma de formacion tecnica en linea orientada a la industria de hidrocarburos. Ofrece cursos organizados en modulos, temas e items de contenido en formato de presentacion, documento o video.',
+      'Cursoil es una plataforma de formacion tecnica en linea orientada a la industria de hidrocarburos. Ofrece cursos organizados en modulos, temas e items de contenido en formato de presentacion, documento o video.',
       'El acceso a la plataforma implica la aceptacion plena de estos terminos por parte del usuario.',
     ],
   },
@@ -25,7 +25,7 @@ const SECCIONES: readonly { titulo: string; parrafos: string[] }[] = [
   {
     titulo: '3. Contenido academico',
     parrafos: [
-      'Los materiales publicados son propiedad de PetroLearn o de sus autores y se ceden unicamente para uso formativo personal.',
+      'Los materiales publicados son propiedad de Cursoil o de sus autores y se ceden unicamente para uso formativo personal.',
       'Queda prohibida la reproduccion, distribucion o comercializacion del contenido sin autorizacion escrita.',
     ],
   },
@@ -40,7 +40,7 @@ const SECCIONES: readonly { titulo: string; parrafos: string[] }[] = [
     titulo: '5. Uso aceptable',
     parrafos: [
       'El usuario se compromete a no vulnerar la seguridad de la plataforma, no suplantar identidades y no publicar contenido ilicito u ofensivo.',
-      'PetroLearn puede suspender cuentas que incumplan estas condiciones.',
+      'Cursoil puede suspender cuentas que incumplan estas condiciones.',
     ],
   },
   {
@@ -54,7 +54,7 @@ const SECCIONES: readonly { titulo: string; parrafos: string[] }[] = [
     titulo: '7. Limitacion de responsabilidad',
     parrafos: [
       'La formacion tiene caracter educativo y no sustituye la normativa, los procedimientos internos ni las certificaciones oficiales exigidas por cada operadora.',
-      'PetroLearn no se responsabiliza por decisiones operativas tomadas a partir del contenido de los cursos.',
+      'Cursoil no se responsabiliza por decisiones operativas tomadas a partir del contenido de los cursos.',
     ],
   },
   {
@@ -67,8 +67,8 @@ const SECCIONES: readonly { titulo: string; parrafos: string[] }[] = [
 
 export default function PaginaTerminos() {
   return (
-    <div className="px-3 pb-3 pt-3 sm:px-6 sm:pt-6">
-      <div className="mx-auto max-w-[1100px] overflow-hidden rounded-[2.5rem] bg-white shadow-soft">
+    <div className="bg-white">
+      <div className="mx-auto w-full max-w-[1100px] bg-white">
         <header className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-12">
           <Logo />
           <Link href="/" className="text-sm font-semibold text-slate-500 transition hover:text-night">
@@ -107,9 +107,9 @@ export default function PaginaTerminos() {
             </address>
           </aside>
         </main>
-
-        <Footer />
       </div>
+
+      <Footer />
     </div>
   );
 }

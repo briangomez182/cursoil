@@ -5,7 +5,7 @@ export const PROFESORES_DEMO: Usuario[] = [
   {
     id: 'demo-prof-1',
     usuario: 'jmendoza',
-    email: 'j.mendoza@petrolearn.com.ve',
+    email: 'j.mendoza@cursoil.com.ve',
     nombre: 'Ing. Jose Mendoza',
     rol: 'profesor',
     especialidad: 'Perforacion y Completacion de Pozos',
@@ -18,7 +18,7 @@ export const PROFESORES_DEMO: Usuario[] = [
   {
     id: 'demo-prof-2',
     usuario: 'lrivas',
-    email: 'l.rivas@petrolearn.com.ve',
+    email: 'l.rivas@cursoil.com.ve',
     nombre: 'Ing. Luisa Rivas',
     rol: 'profesor',
     especialidad: 'Refinacion y Procesos Downstream',
@@ -31,7 +31,7 @@ export const PROFESORES_DEMO: Usuario[] = [
   {
     id: 'demo-prof-3',
     usuario: 'cbastidas',
-    email: 'c.bastidas@petrolearn.com.ve',
+    email: 'c.bastidas@cursoil.com.ve',
     nombre: 'Lic. Carlos Bastidas',
     rol: 'profesor',
     especialidad: 'Seguridad Industrial y Ambiente',

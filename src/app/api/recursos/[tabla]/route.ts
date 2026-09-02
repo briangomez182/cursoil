@@ -20,6 +20,25 @@ export async function GET(_request: Request, { params }: { params: { tabla: stri
     .order(RECURSOS[params.tabla].orden, { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Para la tabla de usuarios: adjunta si el correo esta confirmado en Supabase Auth.
+  if (params.tabla === 'usuarios' && Array.isArray(data)) {
+    try {
+      const { data: auth } = await getSupabase().auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const confirmados = new Map<string, boolean>();
+      for (const u of auth?.users ?? []) {
+        if (u.email) confirmados.set(u.email.toLowerCase(), Boolean(u.email_confirmed_at));
+      }
+      const conEstado = (data as unknown as Record<string, unknown>[]).map((fila) => ({
+        ...fila,
+        correo_confirmado: fila.email ? confirmados.get(String(fila.email).toLowerCase()) ?? false : false,
+      }));
+      return NextResponse.json({ datos: conEstado });
+    } catch {
+      // Si Auth no responde, se devuelve la tabla sin el estado de confirmacion.
+    }
+  }
+
   return NextResponse.json({ datos: data ?? [] });
 }
 

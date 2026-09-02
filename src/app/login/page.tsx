@@ -3,9 +3,11 @@ import type { Metadata } from 'next';
 import MarcoAuth from '@/components/MarcoAuth';
 import FormularioLogin from '@/components/FormularioLogin';
 
-export const metadata: Metadata = { title: 'Iniciar sesion | PetroLearn' };
+export const metadata: Metadata = { title: 'Iniciar sesion | Cursoil' };
 
-export default function PaginaLogin() {
+export default function PaginaLogin({ searchParams }: { searchParams: { correo?: string } }) {
+  const correoConfirmado: boolean = searchParams?.correo === 'confirmado';
+
   return (
     <MarcoAuth
       titulo="Bienvenido de vuelta"
@@ -17,7 +19,14 @@ export default function PaginaLogin() {
         </p>
       }
     >
-      <FormularioLogin />
+      <>
+        {correoConfirmado && (
+          <p className="mb-4 rounded-2xl bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+            Tu correo quedo confirmado. Cuando un administrador acepte tu cuenta podras iniciar sesion.
+          </p>
+        )}
+        <FormularioLogin />
+      </>
     </MarcoAuth>
   );
 }

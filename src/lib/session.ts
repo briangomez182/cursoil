@@ -3,8 +3,8 @@ import { cookies } from 'next/headers';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { SesionUsuario } from './types';
 
-const COOKIE = 'petrolearn_sesion';
-const SECRET: string = process.env.AUTH_SECRET ?? 'petrolearn-dev-secret';
+const COOKIE = 'cursoil_sesion';
+const SECRET: string = process.env.AUTH_SECRET ?? 'cursoil-dev-secret';
 const MAX_AGE = 60 * 60 * 24 * 7;
 
 function firmar(payload: string): string {

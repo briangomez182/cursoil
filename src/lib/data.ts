@@ -1,6 +1,6 @@
 import 'server-only';
 import { getSupabase, supabaseConfigurado } from './supabase';
-import type { Curso, Item, Modulo, Tema, Usuario } from './types';
+import type { Curso, Item, Modulo, PreguntaPublica, Tema, Usuario } from './types';
 import { CURSOS_DEMO, PROFESORES_DEMO } from './demo';
 
 /** Cursos publicados + sus profesores asignados. Cae a datos demo si Supabase no responde. */
@@ -47,6 +47,21 @@ export async function listarTabla<T>(tabla: string, orden: string = 'creado_en')
 
 export async function listarModulos(): Promise<Modulo[]> {
   return listarTabla<Modulo>('modulos', 'orden');
+}
+
+/** Preguntas de todos los examenes, SIN la respuesta correcta (es lo que ve el alumno). */
+export async function listarPreguntasPublicas(): Promise<PreguntaPublica[]> {
+  if (!supabaseConfigurado) return [];
+  try {
+    const { data, error } = await getSupabase()
+      .from('preguntas')
+      .select('id,modulo_id,enunciado,opcion_a,opcion_b,opcion_c,opcion_d,orden,creado_en')
+      .order('orden', { ascending: true });
+    if (error || !data) return [];
+    return data as PreguntaPublica[];
+  } catch {
+    return [];
+  }
 }
 export async function listarTemas(): Promise<Tema[]> {
   return listarTabla<Tema>('temas', 'orden');

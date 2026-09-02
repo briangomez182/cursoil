@@ -14,6 +14,8 @@ export default function FormularioRegistro() {
   const [acepta, setAcepta] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [cargando, setCargando] = useState<boolean>(false);
+  const [enviado, setEnviado] = useState<boolean>(false);
+  const [mensaje, setMensaje] = useState<string>('');
 
   async function enviar(evento: React.FormEvent<HTMLFormElement>): Promise<void> {
     evento.preventDefault();
@@ -25,15 +27,37 @@ export default function FormularioRegistro() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombre, usuario, email, password }),
     });
-    const datos = (await respuesta.json()) as { error?: string };
+    const datos = (await respuesta.json()) as { error?: string; mensaje?: string };
     setCargando(false);
 
     if (!respuesta.ok) {
       setError(datos.error ?? 'No se pudo completar el registro.');
       return;
     }
-    router.push('/');
-    router.refresh();
+    setMensaje(datos.mensaje ?? '');
+    setEnviado(true);
+  }
+
+  if (enviado) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-4"
+      >
+        <div className="rounded-2xl bg-petro-50 px-5 py-6 text-sm text-slate-600">
+          <p className="text-base font-extrabold text-night">Revisa tu correo</p>
+          <p className="mt-2">
+            {mensaje ||
+              'Tu cuenta de alumno quedo pendiente. Un administrador debe aceptarla antes de que puedas iniciar sesion.'}
+          </p>
+        </div>
+        <button type="button" onClick={() => router.push('/login')} className="cta w-full">
+          Ir a iniciar sesion
+        </button>
+      </motion.div>
+    );
   }
 
   return (

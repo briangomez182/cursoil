@@ -65,6 +65,37 @@ export interface CursoProfesor {
   profesor_id: string;
 }
 
+export type OpcionLetra = 'a' | 'b' | 'c' | 'd';
+
+export interface Pregunta {
+  id: string;
+  modulo_id: string;
+  enunciado: string;
+  opcion_a: string;
+  opcion_b: string;
+  opcion_c: string;
+  opcion_d: string;
+  correcta: OpcionLetra;
+  orden: number;
+  creado_en: string;
+}
+
+/** Pregunta tal como la ve el alumno: sin la respuesta correcta. */
+export type PreguntaPublica = Omit<Pregunta, 'correcta'>;
+
+export interface ResultadoExamen {
+  puntaje: number;
+  total: number;
+  aprobado: boolean;
+  /** Por pregunta: la letra elegida y la correcta, para mostrar la revision. */
+  detalle: { pregunta_id: string; elegida: OpcionLetra | null; correcta: OpcionLetra }[];
+}
+
+/** Nota minima para aprobar el examen de un modulo (0-1). */
+export const UMBRAL_APROBACION = 0.7;
+export const PREGUNTAS_POR_EXAMEN = 10;
+export const LETRAS_OPCION: readonly OpcionLetra[] = ['a', 'b', 'c', 'd'] as const;
+
 export interface SesionUsuario {
   id: string;
   usuario: string;

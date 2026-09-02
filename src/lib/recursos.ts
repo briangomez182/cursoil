@@ -1,7 +1,15 @@
 import 'server-only';
 import type { Rol } from './types';
 
-export type Tabla = 'usuarios' | 'cursos' | 'modulos' | 'temas' | 'items' | 'curso_profesores' | 'inscripciones';
+export type Tabla =
+  | 'usuarios'
+  | 'cursos'
+  | 'modulos'
+  | 'temas'
+  | 'items'
+  | 'curso_profesores'
+  | 'inscripciones'
+  | 'preguntas';
 
 interface Definicion {
   campos: readonly string[];
@@ -45,6 +53,11 @@ export const RECURSOS: Record<Tabla, Definicion> = {
     campos: ['curso_id', 'alumno_id', 'progreso'],
     orden: 'creado_en',
     escritura: ['admin'],
+  },
+  preguntas: {
+    campos: ['modulo_id', 'enunciado', 'opcion_a', 'opcion_b', 'opcion_c', 'opcion_d', 'correcta', 'orden'],
+    orden: 'orden',
+    escritura: ['admin', 'profesor'],
   },
 };
 

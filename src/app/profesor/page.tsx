@@ -6,7 +6,7 @@ import { listarTabla } from '@/lib/data';
 import type { Curso, CursoProfesor } from '@/lib/types';
 import { PLATAFORMA } from '@/lib/config';
 
-export const metadata: Metadata = { title: 'Panel del profesor | PetroLearn' };
+export const metadata: Metadata = { title: 'Panel del profesor | Cursoil' };
 export const dynamic = 'force-dynamic';
 
 export default async function PaginaProfesor() {
@@ -22,7 +22,7 @@ export default async function PaginaProfesor() {
   const misCursos: Curso[] = cursos.filter((c) => misCursoIds.includes(c.id));
 
   return (
-    <div className="min-h-screen px-3 py-3 sm:px-6 sm:py-6">
+    <div className="min-h-screen bg-white px-5 py-8 sm:px-10">
       <div className="mx-auto max-w-7xl space-y-6">
         <CabeceraPanel sesion={sesion} titulo="Panel del profesor" />
 

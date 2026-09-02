@@ -9,16 +9,16 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'PetroLearn | Cursos de la Industria Petrolera',
+  title: 'Cursoil | Cursos de la Industria Petrolera',
   description:
     'Plataforma de formacion industrial en petroleo y gas. Cursos de upstream, midstream, downstream, refinacion y seguridad industrial desde Puerto Piritu, Anzoategui, Venezuela.',
-  keywords: ['cursos petroleros', 'formacion industrial', 'oil and gas', 'Venezuela', 'PetroLearn'],
+  keywords: ['cursos petroleros', 'formacion industrial', 'oil and gas', 'Venezuela', 'Cursoil'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={jakarta.variable}>
-      <body className="min-h-screen bg-canvasbg font-sans antialiased">{children}</body>
+      <body className="min-h-screen bg-white font-sans antialiased">{children}</body>
     </html>
   );
 }

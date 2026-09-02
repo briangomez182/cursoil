@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import Hero3D from '@/components/Hero3D';
+import IndustriaPetrolera from '@/components/IndustriaPetrolera';
 import CatalogoCursos from '@/components/CatalogoCursos';
 import SeccionProfesores from '@/components/SeccionProfesores';
 import Aparecer from '@/components/Aparecer';
@@ -33,14 +33,14 @@ export default async function PaginaInicio() {
   const sesion = getSesion();
 
   return (
-    <div className="px-3 pb-3 pt-3 sm:px-6 sm:pt-6">
-      <div className="mx-auto max-w-[1400px] overflow-hidden rounded-[2.5rem] bg-white shadow-soft">
+    <div className="bg-white">
+      <div className="mx-auto w-full max-w-[1600px] bg-white">
         <Navbar sesion={sesion} />
 
         <main>
           {/* HERO */}
           <section className="relative overflow-hidden px-6 pb-16 pt-14 sm:px-12" aria-labelledby="titulo-hero">
-            <div className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-[520px] max-w-4xl rounded-[50%] bg-petro-50" aria-hidden="true" />
+            <div className="pointer-events-none absolute inset-x-0 top-10 mx-auto h-[620px] max-w-4xl rounded-[50%] bg-petro-50" aria-hidden="true" />
 
             <div className="relative mx-auto max-w-3xl text-center">
               <Aparecer>
@@ -55,12 +55,13 @@ export default async function PaginaInicio() {
               </Aparecer>
             </div>
 
-            <div className="relative mx-auto mt-10 max-w-6xl">
-              <Hero3D />
-            </div>
-
             <div className="relative mx-auto mt-8 max-w-6xl" id="cursos">
-              <CatalogoCursos cursos={cursos} profesores={profesores} asignaciones={asignaciones} />
+              <CatalogoCursos
+                cursos={cursos}
+                profesores={profesores}
+                asignaciones={asignaciones}
+                ilustracion={<IndustriaPetrolera />}
+              />
             </div>
           </section>
 
@@ -68,7 +69,7 @@ export default async function PaginaInicio() {
           <section id="nosotros" className="border-t border-slate-100 bg-petro-50/60 px-6 py-16 sm:px-12" aria-labelledby="titulo-nosotros">
             <div className="mx-auto max-w-6xl">
               <Aparecer>
-                <p className="chip">Por que PetroLearn</p>
+                <p className="chip">Por que Cursoil</p>
                 <h2 id="titulo-nosotros" className="mt-3 max-w-2xl text-3xl font-extrabold tracking-tight text-night sm:text-4xl">
                   Una plataforma pensada para la operacion real
                 </h2>
@@ -97,7 +98,7 @@ export default async function PaginaInicio() {
 
               <section id="certificaciones" className="mt-20" aria-labelledby="titulo-cert">
                 <Aparecer>
-                  <div className="grid gap-8 rounded-[2.5rem] bg-night p-10 text-white sm:p-14 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+                  <div className="grid gap-8 rounded-[2rem] bg-night p-10 text-white sm:p-14 lg:grid-cols-[1.4fr_1fr] lg:items-center">
                     <div>
                       <p className="chip bg-white/10 text-petro-300">Certificaciones</p>
                       <h2 id="titulo-cert" className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -128,9 +129,9 @@ export default async function PaginaInicio() {
             </div>
           </div>
         </main>
-
-        <Footer />
       </div>
+
+      <Footer />
     </div>
   );
 }
